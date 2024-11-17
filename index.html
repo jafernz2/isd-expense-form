@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Form - Inferno School District</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    .expense-table td, .expense-table th {
+      padding: 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    .expense-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .expense-row input {
+      width: 80%;
+      margin: 0;
+    }
+    .expense-total {
+      font-size: 1.5em;
+      text-align: right;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    .print-button {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+    .print-button:hover {
+      background-color: #218838;
+    }
+    .signature-section {
+      margin-top: 30px;
+      border-top: 2px solid #ddd;
+      padding-top: 15px;
+    }
+    .final-note {
+      font-size: 1.1em;
+      color: #d9534f;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Inferno School District - Expense Form</h1>
+    
+    <!-- Personal Info Section -->
+    <label for="name">Name of Submitter</label>
+    <input type="text" id="name" required>
+
+    <label for="school-name">School Name</label>
+    <input type="text" id="school-name" required>
+
+    <label for="department">Department</label>
+    <input type="text" id="department" required>
+
+    <label for="title">Title</label>
+    <input type="text" id="title" required>
+
+    <!-- District Credit Card Usage Question -->
+    <label>Did you use the district credit card?</label>
+    <select id="credit-card-usage" required>
+      <option value="">Select...</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+
+    <!-- Purpose of Submission -->
+    <label for="purpose">Purpose of the Submission</label>
+    <textarea id="purpose" rows="4" required></textarea>
+
+    <!-- Expense Details Table -->
+    <h3>Expense Details</h3>
+    <table class="expense-table" id="expense-table">
+      <thead>
+        <tr>
+          <th>Item Description</th>
+          <th>Amount</th>
+          <th>Category</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="expense-row">
+          <td><input type="text" class="item-description"></td>
+          <td><input type="number" class="expense-amount" step="0.01" oninput="calculateTotal()"></td>
+          <td><input type="text" class="expense-category"></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" onclick="addExpenseRow()">Add Expense Row</button>
+
+    <!-- Mileage Section -->
+    <h3>Gas Mileage</h3>
+    <label for="miles">Miles Driven</label>
+    <input type="number" id="miles" oninput="calculateMileage()" required>
+
+    <label for="mileage-rate">Mileage Rate ($/mile)</label>
+    <input type="text" id="mileage-rate" value="0.57" disabled>
+
+    <div id="mileage-total">Mileage Reimbursement: $0.00</div>
+
+    <!-- Comments and Notes Section -->
+    <h3>Comments and Notes</h3>
+    <textarea id="comments" rows="4"></textarea>
+
+    <!-- Total Amount Section -->
+    <div class="expense-total" id="total-amount">Total Amount: $0.00</div>
+
+    <!-- Signature Section -->
+    <div class="signature-section">
+      <label for="signature">Signature</label>
+      <input type="text" id="signature" required>
+    </div>
+
+    <div class="final-note">
+      <p><strong>Note:</strong> This form must be printed as well as saved as a PDF and turned into the ISD service desk system for approval and payment.</p>
+    </div>
+
+    <!-- Print Button -->
+    <button class="print-button" onclick="printForm()">Print</button>
+  </div>
+
+  <script>
+    // Initialize variables
+    let totalAmount = 0;
+    const mileageRate = 0.57;
+
+    // Function to add new expense row
+    function addExpenseRow() {
+      const table = document.getElementById("expense-table").getElementsByTagName('tbody')[0];
+      const newRow = table.insertRow();
+      newRow.classList.add("expense-row");
+
+      const descriptionCell = newRow.insertCell(0);
+      const amountCell = newRow.insertCell(1);
+      const categoryCell = newRow.insertCell(2);
+
+      descriptionCell.innerHTML = '<input type="text" class="item-description">';
+      amountCell.innerHTML = '<input type="number" class="expense-amount" step="0.01" oninput="calculateTotal()">';
+      categoryCell.innerHTML = '<input type="text" class="expense-category">';
+    }
+
+    // Function to calculate the total expense amount
+    function calculateTotal() {
+      const expenseAmounts = document.querySelectorAll(".expense-amount");
+      totalAmount = 0;
+      expenseAmounts.forEach(amountField => {
+        const amount = parseFloat(amountField.value);
+        if (!isNaN(amount)) {
+          totalAmount += amount;
+        }
+      });
+      document.getElementById("total-amount").textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+    }
+
+    // Function to calculate mileage reimbursement
+    function calculateMileage() {
+      const milesDriven = document.getElementById("miles").value;
+      const mileageTotal = milesDriven * mileageRate;
+      document.getElementById("mileage-total").textContent = `Mileage Reimbursement: $${mileageTotal.toFixed(2)}`;
+      totalAmount += mileageTotal;
+      document.getElementById("total-amount").textContent = `Total Amount: $${totalAmount.toFixed(2)}`;
+    }
+
+    // Function to open the print dialog
+    function printForm() {
+      window.print();
+    }
+  </script>
+</body>
+</html>
